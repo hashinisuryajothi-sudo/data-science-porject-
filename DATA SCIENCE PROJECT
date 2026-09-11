@@ -1,0 +1,307 @@
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+file_name = "supermarket_sales_100_rows.xlsx"
+
+df = pd.read_excel(file_name, sheet_name="Sales Data")
+
+print("\n========== FIRST 5 RECORDS ==========")
+print(df.head())
+
+print("\n========== DATASET INFORMATION ==========")
+print(df.info())
+
+print("\n========== STATISTICAL SUMMARY ==========")
+print(df.describe())
+
+
+
+print("\n========== MISSING VALUES ==========")
+print(df.isnull().sum())
+
+
+print("\n========== DUPLICATE RECORDS ==========")
+print(df.duplicated().sum())
+
+total_sales = df["Total Sales (INR)"].sum()
+average_sales = df["Total Sales (INR)"].mean()
+total_quantity = df["Quantity"].sum()
+number_transactions = len(df)
+
+print("\n========== SALES INFORMATION ==========")
+print("Number of Transactions :", number_transactions)
+print("Total Quantity Sold    :", total_quantity)
+print("Total Sales            : ₹", round(total_sales, 2))
+print("Average Transaction    : ₹", round(average_sales, 2))
+
+
+category_sales = df.groupby("Category")["Total Sales (INR)"].sum()
+
+print("\n========== SALES BY CATEGORY ==========")
+print(category_sales)
+
+
+
+plt.figure(figsize=(10, 6))
+
+category_sales.sort_values(ascending=False).plot(
+    kind="bar"
+)
+
+plt.title("Supermarket Sales by Category")
+plt.xlabel("Category")
+plt.ylabel("Total Sales (INR)")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+
+
+plt.figure(figsize=(8, 8))
+
+plt.pie(
+    category_sales,
+    labels=category_sales.index,
+    autopct="%1.1f%%",
+    startangle=90
+)
+
+plt.title("Percentage of Sales by Category")
+plt.show()
+
+
+
+product_sales = df.groupby("Product")["Total Sales (INR)"].sum()
+
+print("\n========== TOP 10 PRODUCTS ==========")
+print(product_sales.sort_values(ascending=False).head(10))
+
+
+
+top_products = product_sales.sort_values(
+    ascending=False
+).head(10)
+
+plt.figure(figsize=(12, 6))
+
+top_products.plot(kind="bar")
+
+plt.title("Top 10 Products by Sales")
+plt.xlabel("Product")
+plt.ylabel("Total Sales (INR)")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+
+df["Date"] = pd.to_datetime(df["Date"])
+
+
+
+daily_sales = df.groupby("Date")["Total Sales (INR)"].sum()
+
+print("\n========== DAILY SALES ==========")
+print(daily_sales)
+
+
+plt.figure(figsize=(12, 6))
+
+plt.plot(
+    daily_sales.index,
+    daily_sales.values,
+    marker="o"
+)
+
+plt.title("Daily Supermarket Sales Trend")
+plt.xlabel("Date")
+plt.ylabel("Sales (INR)")
+plt.xticks(rotation=45)
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+
+
+payment_count = df["Payment Method"].value_counts()
+
+print("\n========== PAYMENT METHODS ==========")
+print(payment_count)
+
+
+plt.figure(figsize=(8, 5))
+
+payment_count.plot(kind="bar")
+
+plt.title("Number of Transactions by Payment Method")
+plt.xlabel("Payment Method")
+plt.ylabel("Number of Transactions")
+plt.xticks(rotation=0)
+plt.tight_layout()
+plt.show()
+
+
+plt.figure(figsize=(7, 7))
+
+plt.pie(
+    payment_count,
+    labels=payment_count.index,
+    autopct="%1.1f%%",
+    startangle=90
+)
+
+plt.title("Payment Method Distribution")
+plt.show()
+
+
+
+customer_count = df["Customer Type"].value_counts()
+
+print("\n========== CUSTOMER TYPES ==========")
+print(customer_count)
+
+
+plt.figure(figsize=(7, 7))
+
+plt.pie(
+    customer_count,
+    labels=customer_count.index,
+    autopct="%1.1f%%",
+    startangle=90
+)
+
+plt.title("Member vs Normal Customers")
+plt.show()
+
+
+
+customer_sales = df.groupby(
+    "Customer Type"
+)["Total Sales (INR)"].sum()
+
+print("\n========== SALES BY CUSTOMER TYPE ==========")
+print(customer_sales)
+
+plt.figure(figsize=(8, 5))
+
+customer_sales.plot(kind="bar")
+
+plt.title("Sales by Customer Type")
+plt.xlabel("Customer Type")
+plt.ylabel("Total Sales (INR)")
+plt.xticks(rotation=0)
+plt.tight_layout()
+plt.show()
+
+
+plt.figure(figsize=(9, 6))
+
+sns.scatterplot(
+    data=df,
+    x="Quantity",
+    y="Total Sales (INR)"
+)
+
+plt.title("Quantity vs Total Sales")
+plt.xlabel("Quantity")
+plt.ylabel("Total Sales (INR)")
+plt.tight_layout()
+plt.show()
+
+
+plt.figure(figsize=(9, 6))
+
+sns.histplot(
+    df["Total Sales (INR)"],
+    bins=10,
+    kde=True
+)
+
+plt.title("Distribution of Transaction Sales")
+plt.xlabel("Total Sales (INR)")
+plt.ylabel("Number of Transactions")
+plt.tight_layout()
+plt.show()
+
+
+category_customer = pd.pivot_table(
+    df,
+    values="Total Sales (INR)",
+    index="Category",
+    columns="Customer Type",
+    aggfunc="sum",
+    fill_value=0
+)
+
+print("\n========== CATEGORY VS CUSTOMER TYPE ==========")
+print(category_customer)
+
+
+
+plt.figure(figsize=(10, 6))
+
+sns.heatmap(
+    category_customer,
+    annot=True,
+    fmt=".0f"
+)
+
+plt.title("Sales by Category and Customer Type")
+plt.xlabel("Customer Type")
+plt.ylabel("Category")
+plt.tight_layout()
+plt.show()
+
+highest_sale = df.loc[
+    df["Total Sales (INR)"].idxmax()
+]
+
+print("\n========== HIGHEST SALES TRANSACTION ==========")
+print(highest_sale)
+
+
+
+lowest_sale = df.loc[
+    df["Total Sales (INR)"].idxmin()
+]
+
+print("\n========== LOWEST SALES TRANSACTION ==========")
+print(lowest_sale)
+
+print("       SUPERMARKET ANALYSIS SUMMARY")
+print("==========================================")
+
+print("Total Transactions :", len(df))
+print("Total Quantity     :", df["Quantity"].sum())
+print("Total Sales        : ₹", round(total_sales, 2))
+print("Average Sale       : ₹", round(average_sales, 2))
+
+print(
+    "Best Category      :",
+    category_sales.idxmax()
+)
+
+print(
+    "Best Product       :",
+    product_sales.idxmax()
+)
+
+print(
+    "Most Used Payment  :",
+    payment_count.idxmax()
+)
+
+print(
+    "Highest Transaction: ₹",
+    round(df["Total Sales (INR)"].max(), 2)
+)
+
+print(
+    "Lowest Transaction : ₹",
+    round(df["Total Sales (INR)"].min(), 2)
+)
+
+print("\nAnalysis completed successfully!")
